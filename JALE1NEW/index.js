@@ -7,6 +7,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.get("/velocidad", (req, res) => {
+  res.json({ nombre: "Omar", apellido: "Reyes" });
+});
+
 app.get("/temperatura", (req, res) => {
   res.json({ valor: "10 °C", timestamp: new Date().toISOString() });
 });
