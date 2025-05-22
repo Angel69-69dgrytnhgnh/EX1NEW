@@ -11,7 +11,7 @@ app.get("/velocidad", (req, res) => {
   res.json({ nombre: "Omar", apellido: "Reyes" });
 });
 
-app.get("/uni", (req, res) => {
+app.get("/unii", (req, res) => {
   res.json({ nombre: "UTLD", ubicacion: "Las cuevas" });
 });
 
