@@ -1,5 +1,7 @@
-const { Pool } = require("pg");
+//const { Pool } = require("pg");
+import pg from "pg";
 
+const { Pool } = pg;
 const pool = new Pool({
   connectionString:
     "postgresql://root:KF3OfYzZgS9t1ZqQa7Y2zjlKC3NDLbmA@dpg-d0vkmf95pdvs738kbrs0-a.oregon-postgres.render.com/iot69",
@@ -21,4 +23,3 @@ async function testConection() {
   }
 }
 */
-testConection();

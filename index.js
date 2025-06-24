@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 30699;
 
 app.use(cors());
 app.use(express.json());
@@ -12,14 +12,14 @@ app.post("/create-data-table", async (req, res) => {
   try {
     const tableName = "data";
 
-    const checkTable = await pool.query(`⁠SELECT to_regclass($1) AS exists`, [
+    const checkTable = await pool.query(`SELECT to_regclass($1) AS exists`, [
       tableName,
     ]);
 
     if (!checkTable.rows[0].exists) {
       await pool.query(`
         CREATE TABLE ${tableName} (
-          id SERIAL PRIMARY KEY,
+          id SERIAL PRIMARY KEY ,
           value TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -27,7 +27,47 @@ app.post("/create-data-table", async (req, res) => {
 
       return res.status(201).json({ message: "✅ Tabla creada exitosamente" });
     } else {
-      return res.status(200).json({ message: "ℹ La tabla ya existe" });
+      return res.status(200).json({ message: " La tabla ya existe" });
+    }
+  } catch (error) {
+    console.error("❌ Error:", error);
+    res.status(500).json({ error: "Error al procesar la solicitud" });
+  }
+});
+
+app.post("/savedata", async (req, res) => {
+  const tableName = "data";
+  const { value } = req.body;
+  console.log("entra");
+
+  try {
+    await pool.query(` INSERT INTO ${tableName} (value) VALUES($1) `, [value]);
+    return res
+      .status(201)
+      .json({ message: "✅ Datos insertados correctamente " });
+  } catch (err) {
+    res.status(500).json({ error: "Error al procesar la solicitud" });
+  }
+});
+
+app.delete("/deletetable", async (req, res) => {
+  try {
+    const tableName = "data";
+
+    const checkTable = await pool.query(`SELECT to_regclass($1) AS exists`, [
+      tableName,
+    ]);
+
+    if (checkTable.rows[0].exists) {
+      await pool.query(`
+        DROP TABLE ${tableName};
+         `);
+
+      return res.status(200).json({ message: "✅ Tabla borrada exitosamente" });
+    } else {
+      return res
+        .status(500)
+        .json({ message: " Error al procesar la solicitud" });
     }
   } catch (error) {
     console.error("❌ Error:", error);
