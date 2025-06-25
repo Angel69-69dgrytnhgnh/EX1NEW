@@ -12,22 +12,23 @@ app.post("/create-data-table", async (req, res) => {
   try {
     const tableName = "data";
 
-    const checkTable = await pool.query(`SELECT to_regclass($1) AS exists`, [
-      tableName,
-    ]);
+    const checkTable = await pool.query(
+      `SELECT to_regclass('${tableName}') AS exists`
+    );
 
     if (!checkTable.rows[0].exists) {
       await pool.query(`
         CREATE TABLE ${tableName} (
-          id SERIAL PRIMARY KEY ,
-          value TEXT,
+          id SERIAL PRIMARY KEY,
+          name TEXT,
+          enrollid TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `);
 
       return res.status(201).json({ message: "✅ Tabla creada exitosamente" });
     } else {
-      return res.status(200).json({ message: " La tabla ya existe" });
+      return res.status(200).json({ message: "ℹ️ La tabla ya existe" });
     }
   } catch (error) {
     console.error("❌ Error:", error);
@@ -37,15 +38,19 @@ app.post("/create-data-table", async (req, res) => {
 
 app.post("/savedata", async (req, res) => {
   const tableName = "data";
-  const { value } = req.body;
+  const { name, enrollid } = req.body;
   console.log("entra");
 
   try {
-    await pool.query(` INSERT INTO ${tableName} (value) VALUES($1) `, [value]);
+    await pool.query(
+      `INSERT INTO ${tableName} (name, enrollid) VALUES ($1, $2)`,
+      [name, enrollid]
+    );
     return res
       .status(201)
-      .json({ message: "✅ Datos insertados correctamente " });
+      .json({ message: "✅ Datos insertados correctamente" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Error al procesar la solicitud" });
   }
 });
