@@ -80,6 +80,16 @@ app.delete("/deletetable", async (req, res) => {
   }
 });
 
+app.get("get-data"),
+  async (req, res) => {
+    const tableName = "data";
+
+    try {
+      await pool.query(`select * from" + ${tableName}`);
+    } catch {}
+    return res.status(500).json({ error: "Imposible regresar los datos" });
+  };
+
 app.listen(PORT, () => {
   console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
 });
