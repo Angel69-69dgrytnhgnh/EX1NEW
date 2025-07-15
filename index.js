@@ -1,6 +1,7 @@
 import pool from "./db.js";
 import express from "express";
 import cors from "cors";
+import { Result } from "pg";
 
 const app = express();
 const PORT = process.env.PORT || 30699;
@@ -80,15 +81,16 @@ app.delete("/deletetable", async (req, res) => {
   }
 });
 
-app.get("get-data"),
-  async (req, res) => {
-    const tableName = "data";
+app.get("get-data", async (req, res) => {
+  const tableName = "data";
 
-    try {
-      await pool.query(`select * from" + ${tableName}`);
-    } catch {}
+  try {
+    const Result = await pool.query(`SELECT * FROM + ${tableName}`);
+    return res.json(Result.rows);
+  } catch {
     return res.status(500).json({ error: "Imposible regresar los datos" });
-  };
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
