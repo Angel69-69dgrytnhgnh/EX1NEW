@@ -81,12 +81,12 @@ app.delete("/deletetable", async (req, res) => {
   }
 });
 
-app.get("get-data", async (req, res) => {
+app.get("/get-data", async (req, res) => {
   const tableName = "data";
 
   try {
-    const Result = await pool.query(`SELECT * FROM + ${tableName}`);
-    return res.json(Result.rows);
+    const result = await pool.query(`SELECT * FROM  ${tableName}`);
+    return res.json(result.rows);
   } catch {
     return res.status(500).json({ error: "Imposible regresar los datos" });
   }

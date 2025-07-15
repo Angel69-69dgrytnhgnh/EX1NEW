@@ -4,7 +4,7 @@ import pg from "pg";
 const { Pool } = pg;
 const pool = new Pool({
   connectionString:
-    "postgresql://root:KF3OfYzZgS9t1ZqQa7Y2zjlKC3NDLbmA@dpg-d0vkmf95pdvs738kbrs0-a.oregon-postgres.render.com/iot69",
+    "postgresql://iot6969_user:cOI6bFkQg1HzhxAU2NUkrNNtl4tzEOWw@dpg-d1qjaq8dl3ps73908amg-a.oregon-postgres.render.com/iot6969",
   ssl: {
     rejectUnauthorized: false,
   },
