@@ -9,113 +9,6 @@ const PORT = process.env.PORT || 30699;
 app.use(cors());
 app.use(express.json());
 
-
-
-app.post("/turn-on", async (req, res) => {
-  const { user, enrollId } = req.body;
-const deviceStatus = {};
-  deviceStatus.isOn=true;
-  try {
-    await pool.query(
-      `INSERT INTO device_logs (action, "user", enroll_id) VALUES ($1, $2, $3)`,
-      ["turn-on", user, enrollId] );
-
-    return res.json({
-      message: "Dispositivo encendido",
-      status: deviceStatus,
-    });
-  } catch (err) {
-    console.error("Error al guardar log:", err);
-    return res.status(500).json({ error: "Error al guardar log"});
-}
-});
-
-
-
-
-app.post("/create-data-table", async (req, res) => {
-  try {
-    const tableName = "data_logs";
-
-    const checkTable = await pool.query(
-      `SELECT to_regclass('${tableName}') AS exists`
-    );
-
-    if (!checkTable.rows[0].exists) {
-      await pool.query(`
-       CREATE TABLE device_logs (
-        id SERIAL PRIMARY KEY,
-        action VARCHAR(50) NOT NULL,
-        "user" TEXT NOT NULL,
-        enroll_id TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
-      `);
-
-      return res.status(201).json({ message: "✅ Tabla creada exitosamente" });
-    } else {
-      return res.status(200).json({ message: "ℹ️ La tabla ya existe" });
-    }
-  } catch (error) {
-    console.error("❌ Error:", error);
-    res.status(500).json({ error: "Error al procesar la solicitud" });
-  }
-});
-
-app.post("/savedata", async (req, res) => {  const tableName = "data";
-  const { name, enrollid } = req.body;
-  console.log("entra");
-
-  try {
-    await pool.query(
-      `INSERT INTO ${tableName} (name, enrollid) VALUES ($1, $2)`,
-      [name, enrollid]
-    );
-    return res
-      .status(201)
-      .json({ message: "✅ Datos insertados correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al procesar la solicitud" });
-  }
-});
- 
-
-app.delete("/deletetable", async (req, res) => {
-  try {
-    const tableName = "data";
-
-    const checkTable = await pool.query(`SELECT to_regclass($1) AS exists`, [
-      tableName,
-    ]);
-
-    if (checkTable.rows[0].exists) {
-      await pool.query(`
-        DROP TABLE ${tableName};
-         `);
-
-      return res.status(200).json({ message: "✅ Tabla borrada exitosamente" });
-    } else {
-      return res
-        .status(500)
-        .json({ message: " Error al procesar la solicitud" });
-    }
-  } catch (error) {
-    console.error("❌ Error:", error);
-    res.status(500).json({ error: "Error al procesar la solicitud" });
-  }
-});
-
-app.get("/get-data", async (req, res) => {
-  const tableName = "data";
-
-  try {
-    const result = await pool.query(`SELECT * FROM  ${tableName}`);
-    return res.json(result.rows);
-  } catch {
-    return res.status(500).json({ error: "Imposible regresar los datos" });
-  }
-});
-
 app.post("/create-device-tables", async (req, res) => {
   try {
     // --- device_logs ---
@@ -138,9 +31,9 @@ app.post("/create-device-tables", async (req, res) => {
 
     // --- relay_status ---
     const checkRelay = await pool.query(
-      `SELECT to_regclass($1)::text AS exists,
+      `SELECT to_regclass($1)::text AS exists`,
       ["public.relay_status"]
-    `);
+    );
 
     if (!checkRelay.rows[0].exists) {
       // Row existence will represent ON/OFF (id=1 present => ON)
@@ -199,7 +92,6 @@ app.get("/status", async (req, res) => {
   }
 });
 
-
 app.post("/save-data", async (req, res) => {
   const { value } = req.body;
 
@@ -209,9 +101,9 @@ app.post("/save-data", async (req, res) => {
   const tableName = "data";
   try {
     const result = await pool.query(
-      `INSERT INTO ${tableName} (value) VALUES ($1) RETURNING *,
+      `INSERT INTO ${tableName} (value) VALUES ($1) RETURNING *`,
       [value]
-    `);
+    );
 
     return res.status(201).json({
       message: "✅ Datos guardados exitosamente",
@@ -219,9 +111,88 @@ app.post("/save-data", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error:", error.message);
-    return res.status(500).json({ error: "Error al guardar los datos"});
-}
+    return res.status(500).json({ error: "Error al guardar los datos" });
+  }
 });
+
+app.post("/create-data-table", async (req, res) => {
+  try {
+    const tableName = "device_logs";
+
+    const checkTable = await pool.query("SELECT to_regclass($1) AS exists", [
+      tableName,
+    ]);
+
+    if (!checkTable.rows[0].exists) {
+      await pool.query(`
+        CREATE TABLE device_logs (
+        id SERIAL PRIMARY KEY,
+        action VARCHAR(50) NOT NULL,
+        "user" TEXT NOT NULL,
+        enroll_id TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+      `);
+
+      return res.status(201).json({ message: "✅ Tabla creada exitosamente" });
+    } else {
+      return res.status(200).json({ message: "ℹ️ La tabla ya existe" });
+    }
+  } catch (error) {
+    console.error("❌ Error:", error.message);
+    res.status(500).json({ error: "Error al procesar la solicitud" });
+  }
+});
+
+
+
+
+
+
+
+ 
+
+app.delete("/delete-data-table", async (req, res) => {
+  try {
+    const tableName = "device_logs";
+
+    const checkTable = await pool.query("SELECT to_regclass($1) AS exists", [
+      tableName,
+    ]);
+
+    if (checkTable.rows[0].exists) {
+      await pool.query(`
+        DROP TABLE ${tableName};
+      `);
+
+      return res
+        .status(200)
+        .json({ message: "✅ Tabla borrada correctamente" });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "ℹ️ Error al procesar la solicitud" });
+    }
+  } catch (error) {
+    console.error("❌ Error:", error.message);
+    res.status(500).json({ error: "Error al procesar la solicitud" });
+  }
+});
+
+
+
+
+
+app.get("/get-data", async (req, res) => {
+  const tableName = "data";
+
+  try {
+    const result = await pool.query(`SELECT * FROM  ${tableName}`);
+    return res.json(result.rows);
+  } catch {
+    return res.status(500).json({ error: "Imposible regresar los datos" });
+  }
+});
+
 
 
 app.listen(PORT, () => {
